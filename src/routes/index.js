@@ -1,8 +1,11 @@
 const index = {
     method: 'GET',
     path: '/',
-    handler: function(request, reply) {
-        reply('hello world');
+    config: {
+        auth: false,
+        handler: function(request, reply) {
+            reply('hello world');
+        }
     }
 };
 
