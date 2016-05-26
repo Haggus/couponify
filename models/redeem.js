@@ -3,7 +3,10 @@ const Redeemed = require('./redeemed');
 
 const RedeemSchema = Mongoose.Schema({
     amount: Number,
-    taken: Number,
+    taken: {
+        type: Number,
+        default: 0
+    },
     entries: [Redeemed]
 });
 

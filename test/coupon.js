@@ -15,8 +15,7 @@ describe('Coupon', function() {
             },
             redeem: {
                 amount: 10,
-                taken: 0,
-                entries: []
+                taken: 0
             }
         };
 

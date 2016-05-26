@@ -36,18 +36,25 @@ server.route({
                     percent_based: Joi.boolean().required()
                 }),
                 redeem: Joi.object({
-                    amount: Joi.number().required(),
-                    taken: Joi.number().required(),
-                    entries: Joi.array().items(
-                        Joi.object({
-                            transaction: Joi.string(),
-                            date: Joi.date()
-                        })
-                    ).allow(null)
+                    amount: Joi.number().required()
                 })
             }
         },
         handler: function(request, reply) {
+            var couponObject = new Coupon({
+                unique_id: 'xyz',
+                campaign: request.payload.campaign,
+                discount: new Discount({
+                    value: request.payload.discount.value,
+                    percent_based: request.payload.discount.percent_based
+                }),
+                redeem: new Redeem({
+                    amount: request.payload.redeem.amount
+                })
+            });
+
+            console.log(couponObject);
+
             reply({
                 result: true
             });
