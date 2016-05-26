@@ -60,6 +60,10 @@ const couponUse = {
                         if (foundCoupon.redeem.taken < foundCoupon.redeem.amount) {
                             foundCoupon.redeem.taken += 1;
 
+                            foundCoupon.redeem.entries.push(new Redeemed({
+                                transaction: 'transaction_id_from_the_store'
+                            }));
+
                             foundCoupon.save(function(err) {
                                 if (err) {
                                     reply(Boom.badRequest('Invalid query'));
