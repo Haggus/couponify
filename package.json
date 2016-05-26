@@ -4,6 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
+    "start": "node main.js",
     "test": "mocha"
   },
   "author": "Mateusz Mrowiec",
@@ -11,5 +12,8 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.5.3"
+  },
+  "dependencies": {
+    "hapi": "^13.4.1"
   }
 }
