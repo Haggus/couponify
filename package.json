@@ -15,6 +15,7 @@
     "superagent": "^2.0.0-alpha.3"
   },
   "dependencies": {
+    "boom": "^3.2.1",
     "hapi": "^13.4.1",
     "joi": "^8.1.1",
     "mongoose": "^4.4.19",

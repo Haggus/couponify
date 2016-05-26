@@ -18,7 +18,7 @@ describe('Coupon', function() {
             }
         };
 
-        var generatedVoucher;
+        var generatedVoucherId;
 
         it('should add a new coupon', function(done) {
             user.post(url_coupon)
@@ -28,7 +28,35 @@ describe('Coupon', function() {
                     expect(res.type).to.equal('application/json');
                     expect(res.body.result).to.equal(true);
 
-                    generatedVoucher = res.body.voucherId;
+                    generatedVoucherId = res.body.voucherId;
+                    done();
+                });
+        });
+
+        it('should get an added coupon', function(done) {
+            user.get(url_coupon + '/' + generatedVoucherId)
+                .end(function(err, res) {
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.type).to.equal('application/json');
+                    expect(res.body.result).to.equal(true);
+
+                    expect(res.body.coupon.discount.value)
+                        .to.equal(sample_coupon.discount.value);
+                    expect(res.body.coupon.discount.percent_based)
+                        .to.equal(sample_coupon.discount.percent_based);
+
+                    done();
+                });
+        });
+
+        it('should return an error if coupon does not exist', function(done) {
+            user.get(url_coupon + '/coupon_that_does_not_exist')
+                .end(function(err, res) {
+                    expect(res.statusCode).to.equal(404);
+                    expect(res.type).to.equal('application/json');
+                    expect(res.body.error).to.equal('Not Found');
+                    expect(res.body.message).to.equal('Invalid coupon ID');
+
                     done();
                 });
         });

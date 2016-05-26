@@ -4,6 +4,7 @@ const Hapi = require('hapi');
 const Mongoose = require('mongoose');
 const Joi = require('joi');
 const CodeGenerator = require('voucher-code-generator');
+const Boom = require('boom');
 
 const CouponSchema = require('./models/coupon');
 const Coupon = Mongoose.model('Coupon', CouponSchema);
@@ -22,6 +23,29 @@ server.route({
     path: '/',
     handler: function(request, reply) {
         reply('hello world');
+    }
+});
+
+server.route({
+    method: 'GET',
+    path: '/api/coupon/{coupon_id}',
+    config: {
+        handler: function(request, reply) {
+            Coupon.findOne(
+                { unique_id: request.params.coupon_id },
+                'discount.value discount.percent_based',
+                function(err, foundCoupon) {
+                    if (err || !foundCoupon) {
+                        reply(Boom.notFound('Invalid coupon ID'));
+                    } else {
+                        reply({
+                            result: true,
+                            coupon: foundCoupon
+                        });
+                    }
+                }
+            );
+        }
     }
 });
 
@@ -60,11 +84,8 @@ server.route({
             });
 
             couponObject.save(function(err, savedCoupon) {
-                if (err) {
-                    console.error(err);
-                    reply({
-                        result: false
-                    });
+                if (err || !savedCoupon) {
+                    reply(Boom.badRequest('Invalid query'));
                 } else {
                     reply({
                         result: true,
