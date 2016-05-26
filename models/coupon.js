@@ -4,6 +4,7 @@ const Redeem = require('./redeem');
 
 const CouponSchema = Mongoose.Schema({
     unique_id: String,
+    campaign: String,
     discount: Discount,
     redeem: Redeem
 });

@@ -1,6 +1,6 @@
 const Mongoose = require('mongoose');
 
-const RedeemedSchema = Mognoose.Schema({
+const RedeemedSchema = Mongoose.Schema({
     transaction: String,
     date: {
         type: Date,
