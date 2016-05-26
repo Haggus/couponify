@@ -122,5 +122,18 @@ describe('Coupon', function() {
                     done();
                 });
         });
+
+        it('should throw an error if trying to get a used up coupon', function(done) {
+            user.get(url_coupon + '/' + generatedVoucherId)
+                .set('Authorization', accessToken)
+                .end(function(err, res) {
+                    expect(res.statusCode).to.equal(404);
+                    expect(res.type).to.equal('application/json');
+                    expect(res.body.error).to.equal('Not Found');
+                    expect(res.body.message).to.equal('Invalid coupon ID');
+
+                    done();
+                });
+        });
     });
 });

@@ -24,15 +24,20 @@ const couponGet = {
         handler: function(request, reply) {
             Coupon.findOne(
                 { unique_id: request.params.coupon_id },
-                'discount.value discount.percent_based',
                 function(err, foundCoupon) {
                     if (err || !foundCoupon) {
                         reply(Boom.notFound('Invalid coupon ID'));
                     } else {
-                        reply({
-                            result: true,
-                            coupon: foundCoupon
-                        });
+                        if (foundCoupon.redeem.taken < foundCoupon.redeem.amount) {
+                            reply({
+                                result: true,
+                                coupon: {
+                                    discount: foundCoupon.discount
+                                }
+                            });
+                        } else {
+                            reply(Boom.notFound('Invalid coupon ID'));
+                        }
                     }
                 }
             );
