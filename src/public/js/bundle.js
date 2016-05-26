@@ -26312,6 +26312,10 @@
 
 	var _buyPage2 = _interopRequireDefault(_buyPage);
 
+	var _successPage = __webpack_require__(236);
+
+	var _successPage2 = _interopRequireDefault(_successPage);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _react2.default.createElement(
@@ -26319,7 +26323,8 @@
 	    { path: '/', component: _app2.default },
 	    _react2.default.createElement(_reactRouter.IndexRoute, { component: _storePage2.default }),
 	    _react2.default.createElement(_reactRouter.Route, { path: 'buy', component: _buyPage2.default }),
-	    _react2.default.createElement(_reactRouter.Route, { path: 'buy/:price', component: _buyPage2.default })
+	    _react2.default.createElement(_reactRouter.Route, { path: 'buy/:price', component: _buyPage2.default }),
+	    _react2.default.createElement(_reactRouter.Route, { path: 'success', component: _successPage2.default })
 	);
 
 /***/ },
@@ -26534,10 +26539,6 @@
 	        value: function submitForm(event) {
 	            event.preventDefault();
 
-	            this.setState({
-	                price: this.state.price -= 10
-	            });
-
 	            var accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp' + 'XVCJ9.eyJpZCI6MSwiY29tcGFueSI6I' + 'lRlc3QgQ29tcGFueSIsImlhdCI6MTQ2' + 'NDI2MjYxNn0.yJE1SR-SxEe9U97PvtT' + '1WgcAxcTqKk_jtL7-WHhTLzI';
 
 	            //token: TEST_IOCuCXL
@@ -26552,11 +26553,21 @@
 	                }
 	                return response.text();
 	            }).then(function (responseText) {
-	                var respArray = JSON.parse(responseText);
+	                var discount = JSON.parse(responseText).coupon.discount;
+	                var newPrice = 0;
+
+	                if (discount.percent_based) {
+	                    newPrice = this.state.originalPrice * discount.value / 100;
+	                } else {
+	                    newPrice = this.state.originalPrice - discount.value;
+	                }
+
 	                this.setState({
-	                    price: respArray.coupon.discount.value,
+	                    price: newPrice,
 	                    errorMessage: null,
-	                    successMessage: 'Valid coupon'
+	                    successMessage: 'Valid coupon',
+	                    coupon: this.state.couponInput,
+	                    couponInput: null
 	                });
 	            }.bind(this)).catch(function (err) {
 	                this.setState({
@@ -26564,6 +26575,38 @@
 	                    successMessage: null
 	                });
 	            }.bind(this));
+	        }
+	    }, {
+	        key: 'checkout',
+	        value: function checkout(event) {
+	            event.preventDefault();
+
+	            if (this.state.coupon) {
+	                var accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp' + 'XVCJ9.eyJpZCI6MSwiY29tcGFueSI6I' + 'lRlc3QgQ29tcGFueSIsImlhdCI6MTQ2' + 'NDI2MjYxNn0.yJE1SR-SxEe9U97PvtT' + '1WgcAxcTqKk_jtL7-WHhTLzI';
+
+	                //token: TEST_IOCuCXL
+	                fetch('/api/coupon/' + this.state.coupon, {
+	                    method: 'POST',
+	                    headers: {
+	                        'Authorization': accessToken
+	                    }
+	                }).then(function (response) {
+	                    if (!response.ok) {
+	                        throw Error(response.statusText);
+	                    }
+	                    return response.text();
+	                }).then(function (responseText) {
+	                    var didUseCoupon = JSON.parse(responseText).result;
+	                    console.log(didUseCoupon);
+
+	                    if (didUseCoupon) {
+	                        console.log(this);
+	                        this.props.history.pushState(null, '/success');
+	                    }
+	                }.bind(this)).catch(function (err) {
+	                    console.log(err);
+	                });
+	            }
 	        }
 	    }, {
 	        key: 'render',
@@ -26599,20 +26642,29 @@
 	                    'Enter coupon code:',
 	                    _react2.default.createElement('input', { type: 'text', id: 'couponCode', onChange: this.handleInputChange.bind(this) }),
 	                    _react2.default.createElement(
+	                        'h3',
+	                        { style: { color: 'red' } },
+	                        this.state.errorMessage
+	                    ),
+	                    _react2.default.createElement(
+	                        'h3',
+	                        { style: { color: 'green' } },
+	                        this.state.successMessage
+	                    ),
+	                    _react2.default.createElement(
 	                        'button',
 	                        { onClick: this.submitForm.bind(this), type: 'submit' },
 	                        'Calculate coupon'
+	                    ),
+	                    _react2.default.createElement(
+	                        'p',
+	                        null,
+	                        _react2.default.createElement(
+	                            'button',
+	                            { onClick: this.checkout.bind(this) },
+	                            'Checkout'
+	                        )
 	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'h3',
-	                    { style: { color: 'red' } },
-	                    this.state.errorMessage
-	                ),
-	                _react2.default.createElement(
-	                    'h3',
-	                    { style: { color: 'green' } },
-	                    this.state.successMessage
 	                )
 	            );
 	        }
@@ -26622,6 +26674,55 @@
 	}(_react2.default.Component);
 
 	module.exports = BuyPage;
+
+/***/ },
+/* 236 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(3);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var SuccessPage = function (_React$Component) {
+	    _inherits(SuccessPage, _React$Component);
+
+	    function SuccessPage() {
+	        _classCallCheck(this, SuccessPage);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(SuccessPage).apply(this, arguments));
+	    }
+
+	    _createClass(SuccessPage, [{
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    'h1',
+	                    null,
+	                    'Success!'
+	                )
+	            );
+	        }
+	    }]);
+
+	    return SuccessPage;
+	}(_react2.default.Component);
+
+	module.exports = SuccessPage;
 
 /***/ }
 /******/ ]);

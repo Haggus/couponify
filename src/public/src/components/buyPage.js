@@ -25,10 +25,6 @@ class BuyPage extends React.Component {
     submitForm(event) {
         event.preventDefault();
 
-        this.setState({
-            price: this.state.price -= 10
-        });
-
         var accessToken =
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp' +
                 'XVCJ9.eyJpZCI6MSwiY29tcGFueSI6I' +
@@ -48,11 +44,21 @@ class BuyPage extends React.Component {
             }
             return response.text();
         }).then(function(responseText) {
-            var respArray = JSON.parse(responseText);
+            var discount = JSON.parse(responseText).coupon.discount;
+            var newPrice = 0;
+
+            if (discount.percent_based) {
+                newPrice = (this.state.originalPrice * discount.value) / 100;
+            } else {
+                newPrice = this.state.originalPrice - discount.value;
+            }
+
             this.setState({
-                price: respArray.coupon.discount.value,
+                price: newPrice,
                 errorMessage: null,
-                successMessage: 'Valid coupon'
+                successMessage: 'Valid coupon',
+                coupon: this.state.couponInput,
+                couponInput: null
             });
         }.bind(this)).catch(function(err) {
             this.setState({
@@ -60,6 +66,42 @@ class BuyPage extends React.Component {
                 successMessage: null
             });
         }.bind(this));
+    }
+
+    checkout(event) {
+        event.preventDefault();
+
+        if (this.state.coupon) {
+            var accessToken =
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp' +
+                    'XVCJ9.eyJpZCI6MSwiY29tcGFueSI6I' +
+                    'lRlc3QgQ29tcGFueSIsImlhdCI6MTQ2' +
+                    'NDI2MjYxNn0.yJE1SR-SxEe9U97PvtT' +
+                    '1WgcAxcTqKk_jtL7-WHhTLzI';
+
+            //token: TEST_IOCuCXL
+            fetch('/api/coupon/' + this.state.coupon, {
+                method: 'POST',
+                headers: {
+                    'Authorization': accessToken
+                }
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.text();
+            }).then(function(responseText) {
+                var didUseCoupon = JSON.parse(responseText).result;
+                console.log(didUseCoupon);
+
+                if (didUseCoupon) {
+                    console.log(this);
+                    this.props.history.pushState(null, '/success');
+                }
+            }.bind(this)).catch(function(err) {
+                console.log(err);
+            });
+        }
     }
 
     render() {
@@ -72,10 +114,13 @@ class BuyPage extends React.Component {
                 <form>
                     Enter coupon code:
                     <input type="text" id="couponCode" onChange={this.handleInputChange.bind(this)} />
+                    <h3 style={{color: 'red'}}>{this.state.errorMessage}</h3>
+                    <h3 style={{color: 'green'}}>{this.state.successMessage}</h3>
                     <button onClick={this.submitForm.bind(this)} type="submit">Calculate coupon</button>
+                    <p>
+                        <button onClick={this.checkout.bind(this)}>Checkout</button>
+                    </p>
                 </form>
-                <h3 style={{color: 'red'}}>{this.state.errorMessage}</h3>
-                <h3 style={{color: 'green'}}>{this.state.successMessage}</h3>
             </div>
         );
     }
