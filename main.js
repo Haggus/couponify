@@ -53,10 +53,17 @@ server.route({
                 })
             });
 
-            console.log(couponObject);
-
-            reply({
-                result: true
+            couponObject.save(function(err, savedCoupon) {
+                if (err) {
+                    console.error(err);
+                    reply({
+                        result: false
+                    });
+                } else {
+                    reply({
+                        result: true
+                    });
+                }
             });
         }
     }

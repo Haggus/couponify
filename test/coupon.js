@@ -14,8 +14,7 @@ describe('Coupon', function() {
                 percent_based: true
             },
             redeem: {
-                amount: 10,
-                taken: 0
+                amount: 10
             }
         };
 
