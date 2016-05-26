@@ -17,6 +17,7 @@
   "dependencies": {
     "hapi": "^13.4.1",
     "joi": "^8.1.1",
-    "mongoose": "^4.4.19"
+    "mongoose": "^4.4.19",
+    "voucher-code-generator": "^1.0.0"
   }
 }

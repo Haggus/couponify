@@ -3,6 +3,7 @@
 const Hapi = require('hapi');
 const Mongoose = require('mongoose');
 const Joi = require('joi');
+const CodeGenerator = require('voucher-code-generator');
 
 const CouponSchema = require('./models/coupon');
 const Coupon = Mongoose.model('Coupon', CouponSchema);
@@ -41,8 +42,13 @@ server.route({
             }
         },
         handler: function(request, reply) {
+            var voucherId = CodeGenerator.generate({
+                prefix: request.payload.campaign + '_',
+                length: 7
+            });
+
             var couponObject = new Coupon({
-                unique_id: 'xyz',
+                unique_id: voucherId,
                 campaign: request.payload.campaign,
                 discount: new Discount({
                     value: request.payload.discount.value,
@@ -61,7 +67,8 @@ server.route({
                     });
                 } else {
                     reply({
-                        result: true
+                        result: true,
+                        voucherId: savedCoupon.unique_id
                     });
                 }
             });

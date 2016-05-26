@@ -8,7 +8,7 @@ describe('Coupon', function() {
         var user = request.agent();
 
         var sample_coupon = {
-            campaign: 'Testowa kampania',
+            campaign: 'TEST',
             discount: {
                 value: 50,
                 percent_based: true
@@ -18,6 +18,8 @@ describe('Coupon', function() {
             }
         };
 
+        var generatedVoucher;
+
         it('should add a new coupon', function(done) {
             user.post(url_coupon)
                 .send(sample_coupon)
@@ -25,6 +27,8 @@ describe('Coupon', function() {
                     expect(res.statusCode).to.equal(200);
                     expect(res.type).to.equal('application/json');
                     expect(res.body.result).to.equal(true);
+
+                    generatedVoucher = res.body.voucherId;
                     done();
                 });
         });
