@@ -100,30 +100,38 @@ const couponPost = {
             }
         },
         handler: function(request, reply) {
-            var voucherId = CodeGenerator.generate({
-                prefix: request.payload.campaign + '_',
-                length: 7
-            });
-
-            var couponObject = new Coupon({
-                unique_id: voucherId,
-                campaign: request.payload.campaign,
-                discount: new Discount({
-                    value: request.payload.discount.value,
-                    percent_based: request.payload.discount.percent_based
-                }),
-                redeem: new Redeem({
-                    amount: request.payload.redeem.amount
-                })
-            });
-
-            couponObject.save(function(err, savedCoupon) {
-                if (err || !savedCoupon) {
+            Coupon.count({ campaign: request.payload.campaign }, function(error, count) {
+                if (error) {
                     reply(Boom.badRequest('Invalid query'));
+                } else if (count && count > 10000) {
+                    reply(Boom.badRequest('Too many campaigns'));
                 } else {
-                    reply({
-                        result: true,
-                        voucherId: savedCoupon.unique_id
+                    var voucherId = CodeGenerator.generate({
+                        prefix: request.payload.campaign + '_',
+                        length: 7
+                    });
+
+                    var couponObject = new Coupon({
+                        unique_id: voucherId,
+                        campaign: request.payload.campaign,
+                        discount: new Discount({
+                            value: request.payload.discount.value,
+                            percent_based: request.payload.discount.percent_based
+                        }),
+                        redeem: new Redeem({
+                            amount: request.payload.redeem.amount
+                        })
+                    });
+
+                    couponObject.save(function(err, savedCoupon) {
+                        if (err || !savedCoupon) {
+                            reply(Boom.badRequest('Invalid query'));
+                        } else {
+                            reply({
+                                result: true,
+                                voucherId: savedCoupon.unique_id
+                            });
+                        }
                     });
                 }
             });
