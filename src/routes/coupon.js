@@ -16,6 +16,11 @@ const couponGet = {
     method: 'GET',
     path: '/api/coupon/{coupon_id}',
     config: {
+        validate: {
+            params: {
+                coupon_id: Joi.string().required()
+            }
+        },
         handler: function(request, reply) {
             Coupon.findOne(
                 { unique_id: request.params.coupon_id },
@@ -28,6 +33,45 @@ const couponGet = {
                             result: true,
                             coupon: foundCoupon
                         });
+                    }
+                }
+            );
+        }
+    }
+};
+
+const couponUse = {
+    method: 'POST',
+    path: '/api/coupon/{coupon_id}',
+    config: {
+        validate: {
+            params: {
+                coupon_id: Joi.string().required()
+            }
+        },
+        handler: function(request, reply) {
+            Coupon.findOne(
+                { unique_id: request.params.coupon_id },
+                function(err, foundCoupon) {
+
+                    if (err || !foundCoupon) {
+                        reply(Boom.notFound('Invalid coupon ID'));
+                    } else {
+                        if (foundCoupon.redeem.taken < foundCoupon.redeem.amount) {
+                            foundCoupon.redeem.taken += 1;
+
+                            foundCoupon.save(function(err) {
+                                if (err) {
+                                    reply(Boom.badRequest('Invalid query'));
+                                } else {
+                                    reply({
+                                        result: true
+                                    });
+                                }
+                            });
+                        } else {
+                            reply(Boom.notFound('Invalid coupon ID'));
+                        }
                     }
                 }
             );
@@ -83,4 +127,4 @@ const couponPost = {
     }
 };
 
-module.exports = [couponGet, couponPost];
+module.exports = [couponGet, couponUse, couponPost];
