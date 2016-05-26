@@ -1,12 +1,23 @@
 'use strict';
 
+const Path = require('path');
+
 const Hapi = require('hapi');
 const Tokens = require('hapi-auth-jwt2');
 const JWT = require('jsonwebtoken');
 const Router = require('hapi-router');
 const Mongoose = require('mongoose');
+const Inert = require('inert');
 
-const server = new Hapi.Server();
+const server = new Hapi.Server({
+    connections: {
+        routes: {
+            files: {
+                relativeTo: Path.join(__dirname, 'src/public')
+            }
+        }
+    }
+});
 server.connection({ port: 3000 });
 
 var admins = {
@@ -24,6 +35,9 @@ console.log(token);
 console.log(' ');
 
 server.register([
+    {
+        register: Inert
+    },
     {
         register: Tokens
     },

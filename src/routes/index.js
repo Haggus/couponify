@@ -4,7 +4,7 @@ const index = {
     config: {
         auth: false,
         handler: function(request, reply) {
-            reply('hello world');
+            reply.file('index.html');
         }
     }
 };
